@@ -11,3 +11,20 @@ def get_order(request):
     }
 
     return order
+
+
+def refund_order(request):
+    order_id = request.args.get("orderId")
+    reason = request.args.get("reason", "No reason provided")
+
+    if not order_id:
+        return ("Missing orderId", 400)
+
+    refund_response = {
+        "orderId": order_id,
+        "refunded": True,
+        "refundReason": reason,
+        "status": "Refund initiated"
+    }
+
+    return refund_response
