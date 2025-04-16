@@ -12,3 +12,6 @@ steps:
         '--allow-unauthenticated',
         '--source=.',
       ]
+
+options:
+  logging: CLOUD_LOGGING_ONLY
