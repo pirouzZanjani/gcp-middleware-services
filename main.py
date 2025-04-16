@@ -1,20 +1,43 @@
 from flask import Flask, request, jsonify
+import uuid
+from faker import Faker
 
+fake = Faker()
 app = Flask(__name__)
 
 @app.route('/orders', methods=['GET'])
 def get_order():
-    customer_id = request.args.get("customerId")
-    if not customer_id:
-        return "Missing customerId", 400
+    order_number = request.args.get("orderNumber")
+    if not order_number:
+        return "Missing orderNumber", 400
 
-    order = {
-        "orderId": "A123",
-        "customerId": customer_id,
-        "items": ["item1", "item2"],
-        "status": "Shipped"
+    fake_order = {
+        "Result": {
+            "GlobalID": str(uuid.uuid4()),
+            "ID": int(fake.random_int(min=100000000, max=999999999)),
+            "Customer": {
+                "EmailAddress": fake.email(),
+                "FirstName": fake.first_name(),
+                "LastName": fake.last_name(),
+                "PhoneNumber": fake.phone_number(),
+                "DateOfBirth": fake.date_of_birth().isoformat() + "T00:00:00Z",
+                "Street": fake.street_name(),
+                "ZipCode": fake.postcode(),
+                "City": fake.city(),
+                "CountryID": fake.country_code()
+            },
+            "Lines": [
+                {
+                    "Description": fake.text(max_nb_chars=30),
+                    "ProductID": fake.random_int(min=10000, max=99999),
+                    "UnitPrice": round(fake.pyfloat(left_digits=2, right_digits=2, positive=True), 2)
+                }
+            ]
+        }
     }
-    return jsonify(order)
+
+    return jsonify(fake_order)
+
 
 @app.route('/refund', methods=['GET'])
 def refund_order():
@@ -32,6 +55,6 @@ def refund_order():
     }
     return jsonify(response)
 
-# GCP will call this function
+# Entry point for GCP Functions Framework
 def main(request):
     return app(request)
